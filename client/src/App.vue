@@ -61,7 +61,7 @@ export default {
 
     setupLeafletMap: function () {
       this.map = L.map("mapContainer").setView(this.center, 26);
-      this.popup = L.popup();
+      //this.popup = L.popup();
 
       //   const at =
       //     "pk.eyJ1IjoibG9yZHdvbGY4MSIsImEiOiJja3g1MWt1YTMxYmNlMm51cXM1ODZ0ZjBrIn0.qQ-uHne3y0LQBtbg2gsXEQ";
@@ -128,11 +128,35 @@ export default {
       //   .setContent("You clicked the map at " + e.latlng.toString())
       //   .openOn(this.map);
     },
-    addPoint() {
-      console.log(this.curentSelect);
-      this.createPoint(this.curentSelect.lat, this.curentSelect.lon);
+    async addPoint() {
+      //console.log(this.selectAdres);
+      // console.log(this.selectMarker);
+      let ll = this.selectMarker.getLatLng();
+      //console.log(ll);
+      let tt = {
+        title: this.selectAdres.display_name,
+        lat: ll.lat,
+        lon: ll.lng,
+        adress: {
+          house_number: this.selectAdres.address.house_number,
+          road: this.selectAdres.address.road,
+          neighbourhood: this.selectAdres.address.neighbourhood,
+          suburb: this.selectAdres.address.suburb,
+          borough: this.selectAdres.address.borough,
+          city: this.selectAdres.address.city,
+          postcode: this.selectAdres.address.postcode,
+          country: this.selectAdres.address.country,
+          country_code: this.selectAdres.address.country_code,
+        },
+      };
+
+      await api.addRecords(tt);
+      this.createPoint(ll.lat, ll.lng);
 
       //console.log(this.map);
+    },
+    selectPoint(e) {
+      this.map.setView(e.latlng);
     },
   },
   mounted() {

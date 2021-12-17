@@ -16,9 +16,10 @@ export default class ApiService {
     return api.get("/records");
   }
   static async addRecords(payload) {
-    return api.post("/records", payload);
+    console.log(payload);
+    return api.post("/record", payload);
   }
   static async getAdress({ lat, lng }) {
-    return geo.get(`/reverse?lat=${lat}&lon=${lng}&format=json`);
+    return geo.post(`/reverse?lat=${lat}&lon=${lng}&format=json`);
   }
 }
