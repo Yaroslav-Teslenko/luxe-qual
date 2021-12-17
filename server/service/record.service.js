@@ -20,7 +20,6 @@ class RecordService {
 
   async getRecords(user) {
     const responce = await RecordModel.find({ user: user });
-
     return responce;
   }
 }

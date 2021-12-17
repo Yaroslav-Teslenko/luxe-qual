@@ -6,12 +6,19 @@ const api = axios.create({
   withCredentials: true,
   baseURL: CL_API_URL,
 });
+const geo = axios.create({
+  // withCredentials: true,
+  baseURL: "https://nominatim.openstreetmap.org",
+});
 
 export default class ApiService {
   static async getRecords() {
     return api.get("/records");
   }
-  static async addRecords() {
-    return api.post("/records");
+  static async addRecords(payload) {
+    return api.post("/records", payload);
+  }
+  static async getAdress({ lat, lng }) {
+    return geo.get(`/reverse?lat=${lat}&lon=${lng}&format=json`);
   }
 }

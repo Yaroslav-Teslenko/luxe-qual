@@ -1,20 +1,32 @@
 <template>
   <div class="main container-fluid">
-    <div class="row">
-      <div class="col-8 mapDiv">
-        <div id="mapContainer" class="map"></div>
-      </div>
-      <div class="col-3">
-        <div class="row">
-          <button @click="addPoint">Add</button>
-          <button @click="getAllPoint">All</button>
-          <div class="cardsDiv col">
-            <template v-for="record of arrPoints" :key="record._id">
-              <card-point :record="record"> </card-point>
-            </template>
-          </div>
+    <div class="mapDiv">
+      <div id="mapContainer" class="map"></div>
+    </div>
+
+    <div class="cardsDiv">
+      <div class="cardsEdit">
+        <div class="mb-3">
+          <label for="address" class="form-label">address</label>
+          <input
+            type="text"
+            class="form-control"
+            id="address"
+            placeholder="address"
+            :value="selectAdres.display_name || ''"
+          />
         </div>
+
+        <button class="btn btn-primary" @click="addPoint">Add</button>
+        <!-- <button @click="getAllPoint">All</button> -->
       </div>
+      <div class="cardsShow">
+        <template v-for="record of arrPoints" :key="record._id">
+          <card-point :record="record"> </card-point>
+        </template>
+      </div>
+
+      <!-- </div> -->
     </div>
   </div>
 </template>
@@ -33,7 +45,7 @@ export default {
       map: null,
       popup: null,
       center: [50.449283, 30.529558],
-      curentSelect: null,
+      selectAdres: { display_name: "" },
       selectMarker: null,
       arrPoints: [],
     };
@@ -74,7 +86,7 @@ export default {
         minZoom: 1,
       }).addTo(this.map);
     },
-    createPoint(lat, lng) {
+    createPoint(lat, lon) {
       let myIcon = L.icon({
         iconUrl: require("@/assets/images/pngwing.com.png"),
         iconSize: [24, 24],
@@ -85,7 +97,7 @@ export default {
         // shadowAnchor: [22, 94],
       });
 
-      let m = L.marker([lat, lng], { icon: myIcon }).addTo(this.map);
+      let m = L.marker([lat, lon], { icon: myIcon }).addTo(this.map);
       // let m = L.circleMarker([lat, lng], {
       //   radius: 10,
       //   color: "red",
@@ -106,24 +118,21 @@ export default {
       console.log("ok");
       // console.log(this.map.getBounds());
     },
-    onMapClick(e) {
-      this.curentSelect = e.latlng;
+    async onMapClick(e) {
+      this.selectAdres = (await api.getAdress(e.latlng)).data;
       this.selectMarker.setLatLng(e.latlng);
+      this.map.setView(e.latlng);
+      // console.log(this.curentSelect);
       // this.popup
       //   .setLatLng(e.latlng)
       //   .setContent("You clicked the map at " + e.latlng.toString())
       //   .openOn(this.map);
     },
     addPoint() {
-      //console.log(this.curentSelect);
-      this.createPoint(this.curentSelect.lat, this.curentSelect.lng);
+      console.log(this.curentSelect);
+      this.createPoint(this.curentSelect.lat, this.curentSelect.lon);
 
-      console.log(this.map);
-    },
-    selectPoint(e) {
-      //console.log(this.curentSelect);
-
-      console.log(e.target.options);
+      //console.log(this.map);
     },
   },
   mounted() {
@@ -161,30 +170,48 @@ export default {
   min-height: 95vh;
 }
 .main {
-  width: auto;
-  height: 95%;
-  min-height: 100%;
+  width: 1200px;
+  height: 800px;
   margin: 10px;
   border: 1px solid red;
+  display: flex;
+  flex-direction: row;
 }
 
 .mapDiv {
   width: 100%;
   height: 100%;
   min-height: 100%;
+  /* min-height: 100%; */
   /* min-height: 600px; */
   background-color: cadetblue;
   border: 1px solid green;
+  padding: 10px;
 }
 
 .map {
-  height: 90vh;
+  height: 100%;
+  width: 100%;
   min-height: 100%;
+  /* height: 90vh;
+  min-height: 100%; */
 }
-.cardsDiv {
-  height: 80vh;
-  min-height: 100%;
+.cardsShow {
+  /* height: 80vh;
+  min-height: 100%; */
+  width: 350px;
   padding: 4px;
   overflow: auto;
+  margin: 10px;
+  height: 650px;
+  display: flex;
+  flex-direction: column;
+}
+.cardsEdit {
+  height: 150px;
+  margin: 10px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
 }
 </style>
