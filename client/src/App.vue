@@ -47,6 +47,7 @@ export default {
   data() {
     return {
       map: null,
+      zoom: 18,
       popup: null,
       center: [50.449283, 30.529558],
       selectAdres: { display_name: "" },
@@ -98,18 +99,16 @@ export default {
         minZoom: 1,
       }).addTo(this.map);
     },
-    createPoint(lat, lon) {
+    createPoint(lat, lon, id = 0) {
       let myIcon = L.icon({
         iconUrl: require("@/assets/images/pngwing.com.png"),
         iconSize: [24, 24],
-        //  iconAnchor: [22, 94],
-        //   popupAnchor: [-3, -76],
-        // shadowUrl: require("@/assets/images/marker-shadow.png"),
         shadowSize: [24, 24],
-        // shadowAnchor: [22, 94],
       });
 
-      let m = L.marker([lat, lon], { icon: myIcon }).addTo(this.map);
+      let m = L.marker([lat, lon], { icon: myIcon, myCustomId: id }).addTo(
+        this.map
+      );
       // let m = L.circleMarker([lat, lng], {
       //   radius: 10,
       //   color: "red",
@@ -169,7 +168,7 @@ export default {
       //console.log(this.map);
     },
     selectPoint(e) {
-      this.map.setView(e.latlng, 17);
+      // this.map.setView(e.latlng, 17);
     },
   },
   mounted() {
