@@ -33,7 +33,11 @@
 
 <script>
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+
 import L from "leaflet";
+import "leaflet.markercluster/dist/leaflet.markercluster-src.js";
 import api from "@/api/api.service";
 import CardPoint from "./components/CardPoint.vue";
 
@@ -48,15 +52,23 @@ export default {
       selectAdres: { display_name: "" },
       selectMarker: null,
       arrPoints: [],
+      markers: null,
     };
   },
   methods: {
     async loadPoints() {
       // this.createPoint(50.27, 30.31);
       this.arrPoints = (await api.getRecords()).data;
+      this.markers = L.markerClusterGroup();
+
       this.arrPoints.forEach((item) => {
-        this.createPoint(item.lat, item.lon);
+        let marker = this.createPoint(item.lat, item.lon);
+        console.log(marker);
+        this.markers.addLayer(marker);
       });
+
+      // Add all markers to map
+      this.map.addLayer(this.markers);
     },
 
     setupLeafletMap: function () {
@@ -112,6 +124,7 @@ export default {
       //.bindPopup("<b>Hello world!</b><br>I am a popup.")
 
       //.openPopup();
+      return m;
     },
 
     resizeMap() {
@@ -156,7 +169,7 @@ export default {
       //console.log(this.map);
     },
     selectPoint(e) {
-      this.map.setView(e.latlng);
+      this.map.setView(e.latlng, 17);
     },
   },
   mounted() {
