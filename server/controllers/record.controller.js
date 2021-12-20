@@ -1,4 +1,5 @@
 const RecordService = require("../service/record.service");
+
 class RecordController {
   async createRecord(req, res, next) {
     try {
@@ -42,8 +43,7 @@ class RecordController {
 
   async getRecords(req, res, next) {
     try {
-      const user = req.params.user;
-      const responce = await RecordService.getRecords(user);
+      const responce = await RecordService.getRecords(req.query);
       return res.json(responce);
     } catch (e) {
       next(e);

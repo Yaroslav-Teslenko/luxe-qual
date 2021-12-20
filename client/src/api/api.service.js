@@ -12,11 +12,10 @@ const geo = axios.create({
 });
 
 export default class ApiService {
-  static async getRecords() {
-    return api.get("/records");
+  static async getRecords(bounds) {
+    return api.get(`/records`, { params: { ne_lat: bounds._northEast.lat, ne_lng: bounds._northEast.lng, sw_lat: bounds._southWest.lat, sw_lng: bounds._southWest.lng } });
   }
   static async addRecords(payload) {
-    console.log(payload);
     return api.post("/record", payload);
   }
   static async getAdress({ lat, lng }) {

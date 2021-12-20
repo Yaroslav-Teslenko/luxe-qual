@@ -21,9 +21,11 @@
         <!-- <button @click="getAllPoint">All</button> -->
       </div>
       <div class="cardsShow">
-        <template v-for="record of arrPoints" :key="record._id">
-          <card-point :record="record"> </card-point>
-        </template>
+        <div v-show="arrPoints.length">
+          <div v-for="record of arrPoints" :key="record._id">
+            <card-point :record="record"> </card-point>
+          </div>
+        </div>
       </div>
 
       <!-- </div> -->
@@ -47,33 +49,29 @@ export default {
   data() {
     return {
       map: null,
-      zoom: 18,
+      zoom: 14,
+      maxZoom: 19,
+      minZoom: 1,
       popup: null,
       center: [50.449283, 30.529558],
       selectAdres: { display_name: "" },
       selectMarker: null,
       arrPoints: [],
       markers: null,
+      bounds: null,
     };
   },
   methods: {
-    async loadPoints() {
-      // this.createPoint(50.27, 30.31);
-      this.arrPoints = (await api.getRecords()).data;
-      this.markers = L.markerClusterGroup();
-
-      this.arrPoints.forEach((item) => {
-        let marker = this.createPoint(item.lat, item.lon);
-        console.log(marker);
-        this.markers.addLayer(marker);
-      });
-
-      // Add all markers to map
-      this.map.addLayer(this.markers);
-    },
-
     setupLeafletMap: function () {
-      this.map = L.map("mapContainer").setView(this.center, 26);
+      this.map = L.map("mapContainer").setView(this.center, this.zoom);
+      L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: this.maxZoom,
+        minZoom: this.minZoom,
+        dragging: false,
+      }).addTo(this.map);
+
       //this.popup = L.popup();
 
       //   const at =
@@ -91,54 +89,38 @@ export default {
       //         "pk.eyJ1IjoibG9yZHdvbGY4MSIsImEiOiJja3g1MWt1YTMxYmNlMm51cXM1ODZ0ZjBrIn0.qQ-uHne3y0LQBtbg2gsXEQ",
       //     }
       //   ).addTo(map);
-
-      L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 18,
-        minZoom: 1,
-      }).addTo(this.map);
     },
-    createPoint(lat, lon, id = 0) {
+    async loadPoints(bounds) {
+      this.arrPoints = (await api.getRecords(bounds)).data;
+      this.markers = L.markerClusterGroup({
+        showCoverageOnHover: false,
+      });
+
+      this.arrPoints.forEach((item) => {
+        let marker = this.drawPoint(item);
+        marker.on("click", this.selectPoint);
+        this.markers.addLayer(marker);
+      });
+      this.map.addLayer(this.markers);
+    },
+    drawPoint(record) {
       let myIcon = L.icon({
         iconUrl: require("@/assets/images/pngwing.com.png"),
         iconSize: [24, 24],
         shadowSize: [24, 24],
       });
 
-      let m = L.marker([lat, lon], { icon: myIcon, myCustomId: id }).addTo(
-        this.map
-      );
-      // let m = L.circleMarker([lat, lng], {
-      //   radius: 10,
-      //   color: "red",
-      //   weight: 3,
-      //   key: "test",
-      // })
-      //   .unbindPopup()
-      //   .addTo(this.map);
-
-      m.on("click", this.selectPoint);
-
-      //.bindPopup("<b>Hello world!</b><br>I am a popup.")
-
-      //.openPopup();
-      return m;
-    },
-
-    resizeMap() {
-      console.log("ok");
-      // console.log(this.map.getBounds());
+      return L.marker([record.lat, record.lon], {
+        icon: myIcon,
+        myCustomId: record._id,
+      });
     },
     async onMapClick(e) {
+      this.bounds = this.map.getBounds();
+
       this.selectAdres = (await api.getAdress(e.latlng)).data;
       this.selectMarker.setLatLng(e.latlng);
       this.map.setView(e.latlng);
-      // console.log(this.curentSelect);
-      // this.popup
-      //   .setLatLng(e.latlng)
-      //   .setContent("You clicked the map at " + e.latlng.toString())
-      //   .openOn(this.map);
     },
     async addPoint() {
       //console.log(this.selectAdres);
@@ -163,17 +145,27 @@ export default {
       };
 
       await api.addRecords(tt);
-      this.createPoint(ll.lat, ll.lng);
-
-      //console.log(this.map);
+      this.loadPoints(this.bounds);
     },
     selectPoint(e) {
       // this.map.setView(e.latlng, 17);
     },
+    setRentacle() {
+      // console.log("bounds");
+      this.bounds = this.map.getBounds();
+      this.loadPoints(this.bounds);
+      // console.log(this.bounds);
+      // set map
+      this.map.fitBounds(this.bounds);
+      console.log(this.bounds);
+      console.log(this.arrPoints);
+    },
   },
+
   mounted() {
     this.setupLeafletMap();
-    this.loadPoints();
+    this.bounds = this.map.getBounds();
+    this.loadPoints(this.bounds);
 
     let myIcon = L.icon({
       iconUrl: require("@/assets/images/marker-icon.png"),
@@ -188,8 +180,10 @@ export default {
     this.selectMarker = L.marker([this.center[0], this.center[1]], {
       icon: myIcon,
     }).addTo(this.map);
-    // this.map.on("zoom", this.resizeMap);
+    // // this.map.on("zoom", this.resizeMap);
     this.map.on("click", this.onMapClick);
+    this.map.on("dragend", this.setRentacle);
+    this.map.on("zoomend", this.setRentacle);
   },
 };
 </script>
