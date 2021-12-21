@@ -92,6 +92,7 @@ export default {
     },
     async loadPoints(bounds) {
       this.arrPoints = (await api.getRecords(bounds)).data;
+
       this.markers = L.markerClusterGroup({
         showCoverageOnHover: false,
       });
@@ -101,6 +102,7 @@ export default {
         marker.on("click", this.selectPoint);
         this.markers.addLayer(marker);
       });
+
       this.map.addLayer(this.markers);
     },
     drawPoint(record) {
