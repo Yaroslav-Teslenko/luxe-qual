@@ -3,11 +3,12 @@ import axios from "axios";
 const CL_API_URL = process.env.VUE_APP_CL_API_URL;
 
 const api = axios.create({
-  // withCredentials: true,
+  withCredentials: false,
   baseURL: CL_API_URL,
 });
 const geo = axios.create({
   // withCredentials: true,
+  withCredentials: false,
   baseURL: "https://nominatim.openstreetmap.org",
 });
 
