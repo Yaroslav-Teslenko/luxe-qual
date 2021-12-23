@@ -91,12 +91,13 @@ export default {
       //   ).addTo(map);
     },
     async loadPoints(bounds) {
+      this.arrPoints = [];
       this.arrPoints = (await api.getRecords(bounds)).data;
 
-      this.markers = L.markerClusterGroup({
-        showCoverageOnHover: false,
-      });
-
+      // this.markers = L.markerClusterGroup({
+      //   showCoverageOnHover: false,
+      // });
+      this.markers = L.layerGroup();
       this.arrPoints.forEach((item) => {
         let marker = this.drawPoint(item);
         marker.on("click", this.selectPoint);
@@ -158,9 +159,10 @@ export default {
       this.loadPoints(this.bounds);
       // console.log(this.bounds);
       // set map
+      // this.map.fitBounds(this.bounds);
       this.map.fitBounds(this.bounds);
+
       console.log(this.bounds);
-      console.log(this.arrPoints);
     },
   },
 
