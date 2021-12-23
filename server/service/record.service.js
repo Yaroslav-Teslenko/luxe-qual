@@ -19,18 +19,25 @@ class RecordService {
   }
 
   async getRecords(bounds) {
-    //const responce = await RecordModel.find({ user: user });
-    //     public static Boolean isWithin(this GeoCoordinate pt, GeoCoordinate sw, GeoCoordinate ne)
-    // {
-    //    return pt.Latitude >= sw.Latitude && pt.Latitude <= ne.Latitude &&
-    //           pt.Longitude >= sw.Longitude &&  pt.Longitude <= ne.Longitude
+    /*
+     n
+    w e
+     s
 
-    console.log(bounds);
+     nw  ne
+     sw  se
+    */
     const { sw_lat, ne_lat, sw_lng, ne_lng } = bounds;
-    console.log(sw_lat, ne_lat);
-    // const responce = await RecordModel.find({ $and: [{ lat: { $gte: +sw_lat } }, { lat: { $lte: +ne_lat } }, { lng: { $gte: +sw_lng } }, { lng: { $lte: +ne_lng } }] });
-    // const responce = await RecordModel.find({ $and: [{ lat: { $gte: sw_lat } }, { lat: { $lte: ne_lat } }, { lng: { $gte: sw_lng } }, { lng: { $lte: ne_lng } }] });
-    const responce = await RecordModel.find({ $and: [{ lat: { $gt: sw_lat } }, { lat: { $lt: ne_lat } }, { lng: { $gt: sw_lng } }, { lng: { $lt: ne_lng } }] });
+    const responce = await RecordModel.find({
+      location: {
+        $geoWithin: {
+          $box: [
+            [sw_lng, sw_lat],
+            [ne_lng, ne_lat],
+          ],
+        },
+      },
+    });
     return responce;
   }
 }

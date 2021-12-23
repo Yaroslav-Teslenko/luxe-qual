@@ -129,6 +129,7 @@ export default {
       //console.log(this.selectAdres);
       // console.log(this.selectMarker);
       let ll = this.selectMarker.getLatLng();
+      //let ll = this.selectMarker.layerPointToLatLng();
       //console.log(ll);
       let tt = {
         title: this.selectAdres.display_name,
@@ -156,6 +157,11 @@ export default {
     setRentacle() {
       // console.log("bounds");
       this.bounds = this.map.getBounds();
+      console.log(this.bounds);
+      console.log("NorthWest", this.bounds.getNorthWest());
+      console.log("getNorthEast", this.bounds.getNorthEast());
+      console.log("getSouthWest", this.bounds.getSouthWest());
+      console.log("getSouthEast", this.bounds.getSouthEast());
       this.loadPoints(this.bounds);
       // console.log(this.bounds);
       // set map
