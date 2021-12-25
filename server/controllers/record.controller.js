@@ -3,7 +3,11 @@ const RecordService = require("../service/record.service");
 class RecordController {
   async createRecord(req, res, next) {
     try {
+      console.log(req.body);
+      console.log(req.file);
       const payload = req.body;
+      const imagename = req.file.filename;
+      payload.image = imagename;
       const responce = await RecordService.createRecord(payload);
       return res.json(responce);
     } catch (e) {

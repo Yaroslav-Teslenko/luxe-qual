@@ -1,6 +1,7 @@
 <template>
   <div class="card" style="width: 18rem">
-    <img src="@/assets/1.jpg" class="card-img-top" alt="..." />
+    <!-- <img src="@/assets/1.jpg" class="card-img-top" alt="..." /> -->
+    <img :src="`${API}/${record.image}`" class="card-img-top" alt="..." />
     <div class="card-body">
       <h5 class="card-title">{{ record.title }}</h5>
       <!-- <p class="card-text">
@@ -16,6 +17,9 @@
 export default {
   name: "CardPoint",
   props: ["record"],
+  data() {
+    return { API: process.env.VUE_APP_CL_API_URL };
+  },
 };
 </script>
 

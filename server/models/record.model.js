@@ -20,8 +20,7 @@ const recordSchema = new Schema({
   title: { type: String, unique: true, required: true },
   lat: { type: Number },
   lon: { type: Number },
-  adress: { type: adressSchema, required: true },
-  images: { type: Array, required: true },
+  image: { type: String, required: true },
   location: {
     type: {
       type: String,

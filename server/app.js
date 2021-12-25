@@ -13,7 +13,7 @@ const router = require("./routes/index");
 const PORT = process.env.PORT || 4000;
 const app = express();
 
-app.use(express.static(`${__dirname}/uploads`));
+app.use(express.static(`${__dirname}/upload`));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

@@ -16,7 +16,18 @@
             :value="selectAdres.display_name || ''"
           />
         </div>
-
+        <div class="mb-3">
+          <label for="formFile" class="form-label"
+            >Default file input example</label
+          >
+          <input
+            class="form-control"
+            type="file"
+            id="file"
+            ref="file"
+            @change="selectFile"
+          />
+        </div>
         <button class="btn btn-primary" @click="addPoint">Add</button>
         <!-- <button @click="getAllPoint">All</button> -->
       </div>
@@ -50,6 +61,7 @@ export default {
   components: { CardPoint },
   data() {
     return {
+      file: "",
       map: null,
       zoom: 14,
       maxZoom: 19,
@@ -66,6 +78,10 @@ export default {
     };
   },
   methods: {
+    selectFile(file) {
+      this.file = this.$refs.file.files[0];
+    },
+
     setupLeafletMap(icon) {
       this.map = L.map("mapContainer").setView(this.center, this.zoom);
       L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
@@ -137,25 +153,22 @@ export default {
         title: this.selectAdres.display_name,
         lat: ll.lat,
         lon: ll.lng,
-        adress: {
-          house_number: this.selectAdres.address.house_number,
-          road: this.selectAdres.address.road,
-          neighbourhood: this.selectAdres.address.neighbourhood,
-          suburb: this.selectAdres.address.suburb,
-          borough: this.selectAdres.address.borough,
-          city: this.selectAdres.address.city,
-          postcode: this.selectAdres.address.postcode,
-          country: this.selectAdres.address.country,
-          country_code: this.selectAdres.address.country_code,
-        },
+        image: "",
       };
+      const formData = new FormData();
+      formData.append("title", this.selectAdres.display_name);
+      formData.append("lat", ll.lat);
+      formData.append("lon", ll.lng);
+      //formData.append("image", "1.jpg");
+      formData.append("file", this.file);
+      await api.addRecords(formData);
 
-      await api.addRecords(tt);
       this.loadPoints(this.bounds);
     },
     selectPoint(e) {
       // this.map.setView(e.latlng, 17);
     },
+
     setRentacle() {
       // console.log("bounds");
       this.bounds = this.map.getBounds();
@@ -255,7 +268,7 @@ export default {
   flex-direction: column;
 }
 .cardsEdit {
-  height: 150px;
+  height: 250px;
   margin: 10px;
   padding: 4px;
   display: flex;

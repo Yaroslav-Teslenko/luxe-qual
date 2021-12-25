@@ -17,7 +17,11 @@ export default class ApiService {
     return api.get(`/records`, { params: { ne_lat: bounds._northEast.lat, ne_lng: bounds._northEast.lng, sw_lat: bounds._southWest.lat, sw_lng: bounds._southWest.lng } });
   }
   static async addRecords(payload) {
-    return api.post("/record", payload);
+    return api.post("/record", payload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   }
   static async getAdress({ lat, lng }) {
     return geo.post(`/reverse?lat=${lat}&lon=${lng}&format=json`);
