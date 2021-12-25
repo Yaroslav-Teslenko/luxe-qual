@@ -37,11 +37,13 @@
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet-geosearch/dist/geosearch.css";
 
 import L from "leaflet";
 import "leaflet.markercluster/dist/leaflet.markercluster-src.js";
 import api from "@/api/api.service";
 import CardPoint from "./components/CardPoint.vue";
+import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 
 export default {
   name: "App",
@@ -59,10 +61,12 @@ export default {
       arrPoints: [],
       markers: null,
       bounds: null,
+      provider: null,
+      searchControl: null,
     };
   },
   methods: {
-    setupLeafletMap: function () {
+    setupLeafletMap(icon) {
       this.map = L.map("mapContainer").setView(this.center, this.zoom);
       L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
         attribution:
@@ -72,32 +76,30 @@ export default {
         dragging: false,
       }).addTo(this.map);
 
-      //this.popup = L.popup();
+      this.provider = new OpenStreetMapProvider({
+        params: {
+          "accept-language": "ru", // render results in Dutch
+          countrycodes: "ua", // limit search results to the Netherlands
+          addressdetails: 1, // include additional address detail parts
+        },
+      });
 
-      //   const at =
-      //     "pk.eyJ1IjoibG9yZHdvbGY4MSIsImEiOiJja3g1MWt1YTMxYmNlMm51cXM1ODZ0ZjBrIn0.qQ-uHne3y0LQBtbg2gsXEQ";
-      //   L.tileLayer(
-      //     "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-      //     {
-      //       attribution:
-      //         'Map data (c) <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery (c) <a href="https://www.mapbox.com/">Mapbox</a>',
-      //       maxZoom: 28,
-      //       tileSize: 512,
-      //       zoomOffset: -1,
-      //       id: "mapbox/streets-v11",
-      //       accessToken:
-      //         "pk.eyJ1IjoibG9yZHdvbGY4MSIsImEiOiJja3g1MWt1YTMxYmNlMm51cXM1ODZ0ZjBrIn0.qQ-uHne3y0LQBtbg2gsXEQ",
-      //     }
-      //   ).addTo(map);
+      this.searchControl = new GeoSearchControl({
+        provider: this.provider,
+        style: "bar",
+        showMarker: false,
+      });
+
+      this.map.addControl(this.searchControl);
     },
     async loadPoints(bounds) {
-      this.arrPoints = [];
+      //this.arrPoints = [];
       this.arrPoints = (await api.getRecords(bounds)).data;
 
-      // this.markers = L.markerClusterGroup({
-      //   showCoverageOnHover: false,
-      // });
-      this.markers = L.layerGroup();
+      this.markers = L.markerClusterGroup({
+        showCoverageOnHover: false,
+      });
+      //this.markers = L.layerGroup();
       this.arrPoints.forEach((item) => {
         let marker = this.drawPoint(item);
         marker.on("click", this.selectPoint);
@@ -157,26 +159,22 @@ export default {
     setRentacle() {
       // console.log("bounds");
       this.bounds = this.map.getBounds();
-      console.log(this.bounds);
-      console.log("NorthWest", this.bounds.getNorthWest());
-      console.log("getNorthEast", this.bounds.getNorthEast());
-      console.log("getSouthWest", this.bounds.getSouthWest());
-      console.log("getSouthEast", this.bounds.getSouthEast());
+      // console.log(this.bounds);
+      // console.log("NorthWest", this.bounds.getNorthWest());
+      // console.log("getNorthEast", this.bounds.getNorthEast());
+      // console.log("getSouthWest", this.bounds.getSouthWest());
+      // console.log("getSouthEast", this.bounds.getSouthEast());
       this.loadPoints(this.bounds);
       // console.log(this.bounds);
       // set map
       // this.map.fitBounds(this.bounds);
       this.map.fitBounds(this.bounds);
 
-      console.log(this.bounds);
+      //console.log(this.bounds);
     },
   },
 
   mounted() {
-    this.setupLeafletMap();
-    this.bounds = this.map.getBounds();
-    this.loadPoints(this.bounds);
-
     let myIcon = L.icon({
       iconUrl: require("@/assets/images/marker-icon.png"),
       iconSize: [24, 24],
@@ -187,6 +185,10 @@ export default {
       shadowAnchor: [24, 24],
     });
 
+    this.setupLeafletMap(myIcon);
+    this.bounds = this.map.getBounds();
+    this.loadPoints(this.bounds);
+
     this.selectMarker = L.marker([this.center[0], this.center[1]], {
       icon: myIcon,
     }).addTo(this.map);
@@ -194,6 +196,11 @@ export default {
     this.map.on("click", this.onMapClick);
     this.map.on("dragend", this.setRentacle);
     this.map.on("zoomend", this.setRentacle);
+    this.map.on("geosearch/showlocation", (e) => {
+      //console.log(e);
+      this.selectMarker.setLatLng(e.marker._latlng);
+      this.map.setView(e.marker._latlng);
+    });
   },
 };
 </script>
